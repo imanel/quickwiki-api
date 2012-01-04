@@ -15,8 +15,11 @@ function do_query(query, callback) {
 do_query('apple inc', function(error, response, body) {
   if(!error && response.statusCode == 200) {
     var $ = cheerio.load(body);
-    var list = ($('#disambigbox').size() == 0);
-    var content_html = $('#bodyContent .mw-content-ltr p').html();
+    var bodyContent = $('#bodyContent');
+    var list = ( bodyContent.find('#disambigbox').size() == 0);
+    var content_wrapper = bodyContent.find('.mw-content-ltr');
+    content_wrapper.remove('table');
+    var content_html = content_wrapper.find('p').html();
     var content = cheerio.load(content_html);
     content('sup').remove();
     console.log( content('p').text() );
