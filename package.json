@@ -4,6 +4,6 @@
   "dependencies": {
     "request": "2.9.3",
     "cheerio": "0.4.1",
-    "coffee-script": ">= 0.0.1"
+    "coffee-script": "*"
   }
 }
