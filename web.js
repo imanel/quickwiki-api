@@ -7,7 +7,7 @@ function do_query(query, callback) {
     method: 'GET',
     uri: 'http://en.wikipedia.org/w/index.php?title=Special:Search&search=' + encodeURI(query),
     headers: {
-      'User-Agent': 'QuickWiki.info Browser'
+      'User-Agent': 'QuickWiki.info Blackberry-compatible Browser'
     }
   }, callback)
 }
