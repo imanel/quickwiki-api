@@ -7,22 +7,30 @@ QuickWikiServer =
     server = http.createServer (request, response) =>
       path = url.parse(request.url, true)
       format = @guessFormat(path.pathname)
-      QuickWiki.query path.query.q, (result) =>
-        @sendResponse(response, 200, format, result)
+      if !format
+        @sendResponse response, 404, 'text', { result: 'error', data: 'Unknown format type.'}
+      else
+        QuickWiki.query path.query.q, (result) =>
+          @sendResponse(response, 200, format, result)
     server.listen(port)
 
   guessFormat: (pathname) ->
-    'json'
+    switch pathname
+      when '/json' then 'json'
+      else undefined
 
-  # Todo
   formatResult: (format, result) ->
-    JSON.stringify { result: result.type, data: result.data }
+    switch format
+      when 'json' then JSON.stringify { result: result.type, data: result.data }
+      when 'text' then result.data
 
   formatHeaders: (format) ->
     base = { "Access-Control-Allow-Origin": "*" }
-    base['Content-Type'] = "application/json"
+    base['Content-Type'] = switch format
+      when 'json' then 'application/json'
+      when 'text' then 'text/plain'
+    base
 
-  # Todo
   sendResponse: (response, status, format, result) ->
     response.writeHead status, @formatHeaders(format)
     response.end @formatResult(format, result)
