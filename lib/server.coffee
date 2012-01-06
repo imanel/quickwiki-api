@@ -13,7 +13,7 @@ formatResult = (format, result) ->
 
   # Todo
 sendResponse = (response, status, format, result) ->
-  response.writeHead status, {"content-type":"application/json"}
+  response.writeHead status, {"content-type":"application/json", "Access-Control-Allow-Origin":"*"}
   response.end formatResult(format, result)
 
 http.createServer( (request, response) ->
