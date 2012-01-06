@@ -6,6 +6,8 @@ QuickWiki =
     @do_query query, (error, response, body) =>
       if !error && response.statusCode == 200
         collback @parseData(body)
+      else
+        collback @errorResponse
 
   do_query: (query, callback) ->
     request {
@@ -20,12 +22,16 @@ QuickWiki =
     documentBody = cheerio.load(content)
     bodyContent = documentBody('#bodyContent')
 
-    list = bodyContent.find('#disambigbox').size() > 0
+    search = bodyContent.find('#search').size() > 0
 
-    if list
-      @parseList(bodyContent)
+    if search
+      @missingResponse
     else
-      @parseText(bodyContent)
+      list = bodyContent.find('#disambigbox').size() > 0
+      if list
+        @parseList(bodyContent)
+      else
+        @parseText(bodyContent)
 
   parseText: (content) ->
     contentWrapper = content.find('.mw-content-ltr')
@@ -37,5 +43,8 @@ QuickWiki =
 
   parseList: (content) ->
     { type: 'list', data: [] }
+
+  missingResponse: { type: 'missing', data: 'Article not found.' }
+  errorResponse: { type: 'error', data: 'Server error - please try again later.' }
 
 module.exports = QuickWiki if module?
