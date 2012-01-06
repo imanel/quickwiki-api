@@ -36,10 +36,17 @@ QuickWiki =
         @parseText(jQuery, contentWrapper)
 
   parseText: (jQuery, content) ->
-    content.remove('table')
-    paragraph = jQuery(content.find('p')[0])
-    paragraph.remove('sup')
-    { type: 'text', data: paragraph.find('p').text() }
+    result = undefined
+    content.find('p').each (i, elem) ->
+      parent = this.parent
+      if parent.type == 'tag' && parent.name == 'div'
+        result = jQuery(this)
+        return false
+    if result
+      result.remove('sup')
+      { type: 'text', data: result.text() }
+    else
+      missingResponse
 
   parseList: (jQuery, content) ->
     result = []
