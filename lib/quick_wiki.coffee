@@ -19,30 +19,41 @@ QuickWiki =
     }, callback
 
   parseData: (content) ->
-    documentBody = cheerio.load(content)
-    bodyContent = documentBody('#bodyContent')
+    jQuery = cheerio.load(content)
+    bodyContent = jQuery('#bodyContent')
 
     search = bodyContent.find('#search').size() > 0
 
     if search
       @missingResponse
     else
+      contentWrapper = bodyContent.find('.mw-content-ltr')
       list = bodyContent.find('#disambigbox').size() > 0
+
       if list
-        @parseList(bodyContent)
+        @parseList(jQuery, contentWrapper)
       else
-        @parseText(bodyContent)
+        @parseText(jQuery, contentWrapper)
 
-  parseText: (content) ->
-    contentWrapper = content.find('.mw-content-ltr')
-    contentWrapper.remove('table')
-    contentHTML = contentWrapper.find('p').html()
-    paragraph = cheerio.load(contentHTML)
-    paragraph('sup').remove()
-    { type: 'text', data: paragraph('p').text() }
+  parseText: (jQuery, content) ->
+    content.remove('table')
+    paragraph = jQuery(content.find('p')[0])
+    paragraph.remove('sup')
+    { type: 'text', data: paragraph.find('p').text() }
 
-  parseList: (content) ->
-    { type: 'list', data: [] }
+  parseList: (jQuery, content) ->
+    result = []
+    liList = []
+    content.find('ul').each (i, elem) ->
+      parent = this.parent
+      if parent.type == 'tag' && parent.name == 'div'
+        jQuery(this).find('li').each ->
+          liList.push jQuery(this)
+    for li in liList
+      children = li.children()
+      if children.size() == 1 && (link = children.find('a')).size() == 1
+        result.push { link: link[0].attribs.title, text: li.text() }
+    { type: 'list', data: result }
 
   missingResponse: { type: 'missing', data: 'Article not found.' }
   errorResponse: { type: 'error', data: 'Server error - please try again later.' }
