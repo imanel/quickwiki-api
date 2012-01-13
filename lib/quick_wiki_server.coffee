@@ -8,11 +8,11 @@ QuickWikiServer =
       path = url.parse(request.url, true)
       format = @guessFormat(path.pathname)
       if !format
-        @sendResponse response, 404, 'text', { type: 'error', data: 'Unknown format type.' }
+        @sendResponse response, 404, 'text', { type: 'invalid', data: 'Unknown format type.' }
       else if !path.query.q
-        @sendResponse response, 400, format, { type: 'error', data: 'No query provided.' }
+        @sendResponse response, 400, format, { type: 'invalid', data: 'No query provided.' }
       else
-        QuickWiki.query path.query.q, (result) =>
+        QuickWiki.query path.query.q, path.query.lang, (result) =>
           status = @getStatus(result.type)
           @sendResponse(response, status, format, result)
     server.listen(port)
@@ -41,6 +41,7 @@ QuickWikiServer =
   getStatus: (status) ->
     switch status
       when 'error' then 500
+      when 'invalid' then 400
       else 200
 
 module.exports = QuickWikiServer if module?

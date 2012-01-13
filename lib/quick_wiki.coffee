@@ -2,17 +2,21 @@ request = require('request')
 cheerio = require("cheerio")
 
 QuickWiki =
-  query: (query, collback) ->
-    @do_query query, (error, response, body) =>
-      if !error && response.statusCode == 200
-        collback @parseData(body)
-      else
-        collback @errorResponse
+  query: (query, lang, collback) ->
+    lang ||= 'en'
+    if @knownLanguages.indexOf(lang) == -1
+      collback @unknownLanguage
+    else
+      @do_query query, lang, (error, response, body) =>
+        if !error && response.statusCode == 200
+          collback @parseData(body)
+        else
+          collback @errorResponse
 
-  do_query: (query, callback) ->
+  do_query: (query, lang, callback) ->
     request {
       method: 'GET',
-      uri: 'http://en.wikipedia.org/w/index.php?title=Special:Search&search=' + encodeURI(query),
+      uri: "http://#{lang}.wikipedia.org/w/index.php?title=Special:Search&search=" + encodeURI(query),
       headers: {
         'User-Agent': 'QuickWiki.info Blackberry-compatible Browser'
       }
@@ -64,5 +68,8 @@ QuickWiki =
 
   missingResponse: { type: 'missing', data: 'Article not found.' }
   errorResponse: { type: 'error', data: 'Server error - please try again later.' }
+  unknownLanguage: { type: 'invalid', data: 'Unknown Wikipedia language.' }
+
+  knownLanguages: [ "ar", "bg", "ca", "cs", "da", "de", "en", "es", "eo", "eu", "fa", "fr", "ko", "hi", "hr", "id", "it", "he", "lt", "hu", "ms", "nl", "ja", "no", "pl", "pt", "kk", "ro", "ru", "sk", "sl", "sr", "fi", "sv", "tr", "uk", "vi", "vo", "war", "zh" ]
 
 module.exports = QuickWiki if module?
