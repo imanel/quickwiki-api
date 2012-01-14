@@ -2,16 +2,16 @@ request = require('request')
 cheerio = require("cheerio")
 
 QuickWiki =
-  query: (query, lang, collback) ->
+  query: (query, lang, callback) ->
     lang ||= 'en'
     if @knownLanguages.indexOf(lang) == -1
-      collback @unknownLanguage
+      callback @unknownLanguage
     else
       @do_query query, lang, (error, response, body) =>
         if !error && response.statusCode == 200
-          collback @parseData(body, response.request.uri.href)
+          callback @parseData(body, response.request.uri.href)
         else
-          collback @errorResponse
+          callback @errorResponse
 
   do_query: (query, lang, callback) ->
     request {
