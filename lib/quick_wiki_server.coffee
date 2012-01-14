@@ -24,8 +24,11 @@ QuickWikiServer =
 
   formatResult: (format, result) ->
     switch format
-      when 'json' then JSON.stringify { result: result.type, data: result.data }
       when 'text' then result.data
+      when 'json'
+        json = { result: result.type, data: result.data }
+        json.url = result.url if result.url?
+        JSON.stringify json
 
   formatHeaders: (format) ->
     base = { "Access-Control-Allow-Origin": "*" }

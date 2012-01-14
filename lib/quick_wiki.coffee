@@ -9,7 +9,7 @@ QuickWiki =
     else
       @do_query query, lang, (error, response, body) =>
         if !error && response.statusCode == 200
-          collback @parseData(body)
+          collback @parseData(body, response.request.uri.href)
         else
           collback @errorResponse
 
@@ -22,7 +22,7 @@ QuickWiki =
       }
     }, callback
 
-  parseData: (content) ->
+  parseData: (content, url) ->
     jQuery = cheerio.load(content)
     bodyContent = jQuery('#bodyContent')
 
@@ -37,9 +37,9 @@ QuickWiki =
       if list
         @parseList(jQuery, contentWrapper)
       else
-        @parseText(jQuery, contentWrapper)
+        @parseText(jQuery, contentWrapper, url)
 
-  parseText: (jQuery, content) ->
+  parseText: (jQuery, content, url) ->
     result = undefined
     content.find('p').each (i, elem) ->
       parent = this.parent
@@ -48,7 +48,7 @@ QuickWiki =
         return false
     if result
       result.remove('sup')
-      { type: 'text', data: result.text() }
+      { type: 'text', data: result.text(), url: @checkURL(url) }
     else
       missingResponse
 
@@ -65,6 +65,9 @@ QuickWiki =
       if children.size() == 1 && (link = children.find('a')).size() == 1
         result.push { link: link[0].attribs.title, text: li.text() }
     { type: 'list', data: result }
+
+  checkURL: (url) ->
+    url.replace(/\/\/(\w+)\.m\.wikipedia\.org\//, "//$1.wikipedia.org/")
 
   missingResponse: { type: 'missing', data: 'Article not found.' }
   errorResponse: { type: 'error', data: 'Server error - please try again later.' }
