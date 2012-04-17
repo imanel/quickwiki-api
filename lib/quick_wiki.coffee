@@ -50,7 +50,7 @@ QuickWiki =
       result.remove('sup')
       { type: 'text', data: result.text(), url: @checkURL(url) }
     else
-      missingResponse
+      @missingResponse
 
   parseList: (jQuery, content) ->
     result = []
